@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat en Vivo - Quinceañera</title>
+    <!-- Cargar la librería supabase-js desde un CDN (versión más reciente) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.11.0/dist/supabase.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: url('imagenes/verde.avif') no-repeat center center fixed;
+            background-size: cover;
+            color: #333;
+            overflow: hidden;
+        }
+        .container {
+            max-width: 600px;
+            width: 90%;
+            margin: 20px auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+            position: relative;
+            z-index: 2;
+        }
+        .header {
+            background: linear-gradient(45deg, #4B9F83, #1F8059);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .name-input {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .name-input input {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            width: 80%;
+            margin: 10px 0;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        .name-input input:focus {
+            border-color: #4B9F83;
+            box-shadow: 0 0 6px #4B9F83;
+        }
+        .name-input button {
+            background: linear-gradient(45deg, #4B9F83, #1F8059);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.3s ease;
+            margin-top: 15px;
+        }
+        .name-input button:hover {
+            transform: scale(1.1);
+        }
+        .chat-container {
+            display: none;
+            flex-direction: column;
+            height: 70vh;
+            overflow: hidden;
+        }
+        .chat-box {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            border-bottom: 1px solid #ddd;
+            background: url('imagenes/fotoD.jpeg') no-repeat center center;
+            background-size: cover;
+        }
+        .mensaje {
+            margin-bottom: 15px;
+            animation: fadeIn 0.5s ease-in-out;
+            clear: both;
+        }
+        .mensaje-contenido {
+            background: #fff;
+            border-radius: 15px;
+            padding: 10px 15px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+            max-width: 80%;
+        }
+        .mensaje.sent .mensaje-contenido {
+            background: #DCF8C6;
+            float: right;
+        }
+        .chat-input-container {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: #fff;
+            border-top: 1px solid #ddd;
+        }
+        .chat-input-container input {
+            flex: 1;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            margin-right: 10px;
+            outline: none;
+        }
+        .chat-input-container button {
+            background: linear-gradient(45deg, #4B9F83, #1F8059);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            padding: 10px;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .error-message {
+            color: #ff0000;
+            font-size: 14px;
+            margin-top: 5px;
+            text-align: center;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .rain-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 1;
+        }
+        .rain-image {
+            position: absolute;
+            top: -10%;
+            animation: fall linear infinite;
+            opacity: 0.8;
+        }
+        @keyframes fall {
+            0% { transform: translateY(-10%) rotate(0deg); }
+            100% { transform: translateY(120%) rotate(360deg); }
+        }
+         /* Added loading indicator styles */
+         .loading-spinner {
+            display: none;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4B9F83;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 10px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Added success message styles */
+        .success-message {
+            color: #4B9F83;
+            text-align: center;
+            padding: 10px;
+            margin: 10px 0;
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        /* Added typing indicator */
+        .typing-indicator {
+            display: none;
+            padding: 10px;
+            color: #666;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <audio id="backgroundMusic" autoplay loop>
+        <source src="musica/mujer.ogg" type="audio/ogg">
+        <source src="musica/mujer.mp3" type="audio/mpeg">
+        Tu navegador no soporta audio.
+    </audio>
+
+    <div class="rain-container" id="rainContainer"></div>
+
+    <div class="container">
+        <div class="header">¡Deja tus mejores deseos para la quinceañera!</div>
+    
+        <div class="name-input" id="nameInput">
+            <h3>Ingresa tus datos para comenzar</h3>
+            <input type="text" id="userName" placeholder="Escribe tu nombre..." required>
+            <input type="email" id="userEmail" placeholder="Escribe tu correo electrónico..." required>
+            <div id="errorMessage" class="error-message"></div>
+            <div id="loadingSpinner" class="loading-spinner"></div>
+            <button id="startChatButton" onclick="startChat()">Entrar al chat</button>
+        </div>
+    
+        <div id="successMessage" class="success-message"></div>
+    
+        <div class="chat-container" id="chatContainer">
+            <div class="chat-box" id="chatBox"></div>
+            <div id="typingIndicator" class="typing-indicator">Alguien está escribiendo...</div>
+            <div class="chat-input-container">
+                <input type="text" id="chatInput" placeholder="Escribe tu mensaje aquí...">
+                <button id="sendButton" onclick="sendMessage()">➤</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Configuración de Supabase
+         // Configuración de Supabase (esto debe estar después de la carga de la librería)
+         const supabaseUrl = 'https://nsbgyfjtfnehsppomyyq.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5zYmd5Zmp0Zm5laHNwcG9teXlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQzOTAxNjAsImV4cCI6MjA0OTk2NjE2MH0.kmyNXQvidIyu22hBoyDUUXVx5nl2UbqG0Mb2nlm0KhU';
+        
+        // Crear el cliente de Supabase DESPUÉS de haber cargado la librería
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        // Agregar esto temporalmente para debug
+        supabase.from('users').select('*')
+            .then(response => {
+                console.log('Prueba de conexión:', response);
+            })
+            .catch(error => {
+                console.error('Error de conexión:', error);
+            });
+
+        let nombre = '';
+        let email = '';
+        let typingTimeout = null;
+    
+        // Mejorada la validación de email
+        function validateEmail(email) {
+            const re = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+            return re.test(String(email).toLowerCase());
+        }
+    
+        // Mejorada la validación de nombre
+        function validateName(name) {
+            return /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{2,50}$/.test(name);
+        }
+    
+        // Función para manejar el estado de carga
+        function setLoading(isLoading) {
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const startChatButton = document.getElementById('startChatButton');
+            
+            loadingSpinner.style.display = isLoading ? 'block' : 'none';
+            startChatButton.disabled = isLoading;
+        }
+    
+        // Mejorada la inicialización de suscripción en tiempo real
+        function initializeRealtimeSubscription() {
+            const channel = supabase
+                .channel('messages')
+                .on('postgres_changes', 
+                    { event: 'INSERT', schema: 'public', table: 'messages' },
+                    payload => {
+                        if (payload.new.email !== email) {
+                            displayMessage(payload.new);
+                            playNotificationSound();
+                        }
+                    }
+                )
+                .subscribe();
+    
+            return channel;
+        }
+
+        // Código de depuración
+async function testSupabaseConnection() {
+    console.log('Iniciando prueba de conexión...');
+    
+    try {
+        // Probar conexión
+        const { data: test, error: testError } = await supabase
+            .from('users')
+            .select('count(*)');
+            
+        console.log('Resultado de prueba:', test);
+        console.log('Error de prueba:', testError);
+        
+        if (testError) {
+            console.error('Error en la conexión:', testError);
+            return false;
+        }
+        
+        console.log('Conexión exitosa');
+        return true;
+    } catch (error) {
+        console.error('Error catch:', error);
+        return false;
+    }
+}
+
+// Ejecutar la prueba al cargar
+document.addEventListener('DOMContentLoaded', () => {
+    testSupabaseConnection();
+});
+    
+        // Función para reproducir sonido de notificación
+        function playNotificationSound() {
+            const audio = new Audio('notification.mp3');
+            audio.play().catch(err => console.log('Error playing notification:', err));
+        }
+
+async function loadExistingMessages() {
+    try {
+        const { data, error } = await supabase
+            .from('messages')
+            .select('*')
+            .order('created_at', { ascending: true })
+            .limit(50);
+
+        if (error) throw error;
+
+        const chatBox = document.getElementById('chatBox');
+        chatBox.innerHTML = '';
+        data.forEach(message => displayMessage(message));
+        chatBox.scrollTop = chatBox.scrollHeight;
+    } catch (error) {
+        console.error('Error al cargar mensajes:', error);
+        showError('No se pudieron cargar los mensajes anteriores');
+    }
+}
+
+
+        // Mejorada la visualización de mensajes
+        function displayMessage(message) {
+            const chatBox = document.getElementById('chatBox');
+            const mensajeDiv = document.createElement('div');
+            mensajeDiv.classList.add('mensaje');
+            
+            if (message.email === email) {
+                mensajeDiv.classList.add('sent');
+            }
+
+            const mensajeContenido = document.createElement('div');
+            mensajeContenido.classList.add('mensaje-contenido');
+            
+            // Escapar HTML para prevenir XSS
+            const safeContent = escapeHtml(message.content);
+            const safeName = escapeHtml(message.name);
+            
+            mensajeContenido.innerHTML = `
+                <strong>${safeName}:</strong><br>
+                ${safeContent}
+            `;
+            
+            mensajeDiv.appendChild(mensajeContenido);
+            chatBox.appendChild(mensajeDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // Función para escapar HTML
+        function escapeHtml(unsafe) {
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // Mejorado el manejo de errores
+        function showError(message) {
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+                errorMessage.textContent = '';
+            }, 5000);
+        }
+
+        // Mejorada la función principal para iniciar el chat
+        async function startChat() {
+    const inputName = document.getElementById('userName').value.trim();
+    const inputEmail = document.getElementById('userEmail').value.trim();
+
+    console.log('Iniciando chat con:', { inputName, inputEmail });
+
+    if (!validateName(inputName)) {
+        showError('El nombre solo puede contener letras y espacios, entre 2 y 50 caracteres');
+        return;
+    }
+
+    if (!validateEmail(inputEmail)) {
+        showError('Por favor, ingrese un correo electrónico válido');
+        return;
+    }
+
+    setLoading(true);
+
+    try {
+        console.log('Verificando usuario existente...');
+        const { data: existingUser, error: userError } = await supabase
+            .from('users')
+            .select('email')
+            .eq('email', inputEmail)
+            .single();
+
+        console.log('Resultado búsqueda usuario:', { existingUser, userError });
+
+        if (userError && userError.code !== 'PGRST116') {
+            console.error('Error al buscar usuario:', userError);
+            throw userError;
+        }
+
+        if (!existingUser) {
+            console.log('Creando nuevo usuario...');
+            const { data: newUser, error: insertError } = await supabase
+                .from('users')
+                .insert({ name: inputName, email: inputEmail })
+                .select()
+                .single();
+
+            console.log('Resultado crear usuario:', { newUser, insertError });
+
+            if (insertError) {
+                console.error('Error al crear usuario:', insertError);
+                throw insertError;
+            }
+        }
+
+        nombre = inputName;
+        email = inputEmail;
+        
+        // Actualizar UI
+        document.getElementById('nameInput').style.display = 'none';
+        document.getElementById('successMessage').style.display = 'block';
+        document.getElementById('successMessage').textContent = `¡Bienvenido, ${nombre}!`;
+        document.getElementById('chatContainer').style.display = 'flex';
+
+        await loadExistingMessages();
+        initializeRealtimeSubscription();
+        startRain();
+        
+        document.getElementById('chatInput').focus();
+  // Enfocar el input del chat
+    } catch (error) {
+        console.error('Error detallado al iniciar el chat:', error);
+        showError('Ocurrió un problema al iniciar el chat. Por favor, intente nuevamente.');
+    } finally {
+        setLoading(false);
+    }
+}         
+        // Mejorado el envío de mensajes
+        async function sendMessage() {
+            const chatInput = document.getElementById('chatInput');
+            const sendButton = document.getElementById('sendButton');
+            const message = chatInput.value.trim();
+
+            if (!message) return;
+
+            sendButton.disabled = true;
+            chatInput.disabled = true;
+
+            try {
+                const { error } = await supabase
+                    .from('messages')
+                    .insert([{
+                        content: message,
+                        name: nombre,
+                        email: email
+                    }]);
+
+                if (error) throw error;
+
+                chatInput.value = '';
+            } catch (error) {
+                console.error('Error al enviar mensaje:', error);
+                showError('No se pudo enviar el mensaje. Intente nuevamente.');
+            } finally {
+                sendButton.disabled = false;
+                chatInput.disabled = false;
+                chatInput.focus();
+            }
+        }
+
+        // Mejorada la animación de lluvia
+        function startRain() {
+            const container = document.getElementById('rainContainer');
+            const rainImages = ['imagenes/flor4.WEBP', 'imagenes/flor.png', 'imagenes/gota3.png'];
+            
+            function createRainDrop() {
+                const img = document.createElement('img');
+                img.src = rainImages[Math.floor(Math.random() * rainImages.length)];
+                img.classList.add('rain-image');
+                img.style.left = `${Math.random() * 100}%`;
+                img.style.animationDuration = `${Math.random() * 2 + 3}s`;
+                
+                img.onanimationend = () => {
+                    img.remove();
+                    createRainDrop();
+                };
+
+                container.appendChild(img);
+            }
+
+            // Crear gotas iniciales
+            for (let i = 0; i < 10; i++) {
+                createRainDrop();
+            }
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            const chatInput = document.getElementById('chatInput');
+            
+            chatInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            // Manejar el indicador de escritura
+            chatInput.addEventListener('input', () => {
+                if (typingTimeout) clearTimeout(typingTimeout);
+                
+                const typingIndicator = document.getElementById('typingIndicator');
+                typingIndicator.style.display = 'block';
+                
+                typingTimeout = setTimeout(() => {
+                    typingIndicator.style.display = 'none';
+                }, 1000);
+            });
+        });
+    </script>
+</body>
+</html>

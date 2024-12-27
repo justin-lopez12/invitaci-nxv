@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Quinceañera</title>
+    <style>
+        /* Estilos originales mantenidos */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: url('./imagenes/verde.avif') no-repeat center center fixed;
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            background-color: #4CAF50;
+            cursor: pointer;
+        }
+
+        .button:hover {
+            background-color: #45a049;
+        }
+
+        .error-message {
+            color: red;
+            font-size: 14px;
+            display: none;
+            margin-top: 10px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Nuevos estilos para dashboard */
+        .dashboard-container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dashboard-button {
+            background-color: #3498db;
+            margin: 10px 0;
+            transition: background-color 0.3s ease;
+        }
+
+        .dashboard-button:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Container -->
+    <div class="container" id="login-container">
+        <h2>Iniciar Sesión</h2>
+        <input type="email" id="login-email" placeholder="Correo electrónico" required>
+        <input type="password" id="login-password" placeholder="Contraseña" required>
+        <button class="button" onclick="login()">Iniciar sesión</button>
+        <button class="button" onclick="showRegisterForm()">Agregar Usuario</button>
+        <div class="error-message" id="login-error"></div>
+    </div>
+
+    <!-- Register Container -->
+    <div class="container hidden" id="register-container">
+        <h2>Registrar Usuario</h2>
+        <input type="email" id="register-email" placeholder="Correo electrónico" required>
+        <input type="password" id="register-password" placeholder="Contraseña" required>
+        <input type="password" id="confirm-password" placeholder="Confirmar Contraseña" required>
+        <input type="text" id="security-code" placeholder="Código de Seguridad" required>
+        <button class="button" onclick="register()">Registrar</button>
+        <button class="button" onclick="cancelRegister()">Cancelar</button>
+        <div class="error-message" id="register-error"></div>
+    </div>
+
+    <!-- Dashboard Container (inicialmente oculto) -->
+    <div class="container hidden" id="dashboard-container">
+        <h2>Menú Principal</h2>
+        <div class="dashboard-container">
+            <button class="button dashboard-button" onclick="verMensajes()">Ver Mensajes</button>
+            <button class="button dashboard-button" onclick="verFotos()">Ver Fotos</button>
+            <button class="button dashboard-button" onclick="verInvitados()">Ver Lista de Invitados</button>
+            <button class="button dashboard-button" style="background-color: #e74c3c;" onclick="cerrarSesion()">Cerrar Sesión</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js';
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js';
+        import { getFirestore, setDoc, doc } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js';
+
+        // Configuración de Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyDsMjtHwFnsvFFE8I0X68i5cwo0PctyQQc",
+            authDomain: "invitacionxv1.firebaseapp.com",
+            projectId: "invitacionxv1",
+            storageBucket: "invitacionxv1.appspot.com",
+            messagingSenderId: "286170594893",
+            appId: "1:286170594893:web:57652bc00a5195fd0fa604",
+            measurementId: "G-H8N92VG6G4"
+        };
+
+        // Inicializar Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Mostrar formulario de registro
+        function showRegisterForm() {
+            document.getElementById("login-container").classList.add("hidden");
+            document.getElementById("register-container").classList.remove("hidden");
+        }
+
+        // Cancelar registro
+        function cancelRegister() {
+            document.getElementById("register-container").classList.add("hidden");
+            document.getElementById("login-container").classList.remove("hidden");
+        }
+
+        // Función de registro
+        async function register() {
+    const email = document.getElementById("register-email").value;
+    const password = document.getElementById("register-password").value;
+    const confirmPassword = document.getElementById("confirm-password").value;
+    const securityCode = document.getElementById("security-code").value;
+    const errorDiv = document.getElementById("register-error");
+
+    // Validaciones
+    if (!email || !password || !securityCode) {
+        errorDiv.textContent = "Por favor, complete todos los campos.";
+        errorDiv.style.display = "block";
+        return;
+    }
+
+    if (securityCode !== "1219") {
+        errorDiv.textContent = "Código de seguridad incorrecto.";
+        errorDiv.style.display = "block";
+        return;
+    }
+
+    if (password !== confirmPassword) {
+        errorDiv.textContent = "Las contraseñas no coinciden.";
+        errorDiv.style.display = "block";
+        return;
+    }
+
+    if (password.length < 6) {
+        errorDiv.textContent = "La contraseña debe tener al menos 6 caracteres.";
+        errorDiv.style.display = "block";
+        return;
+    }
+
+    try {
+        // Crear usuario en Firebase Authentication
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // Guardar información adicional en Firestore
+        await setDoc(doc(db, "usuarios", user.uid), {
+            email: user.email,
+            createdAt: new Date()
+        });
+
+        // Mostrar mensaje de éxito
+        alert("Usuario registrado con éxito.");
+        
+        // Limpiar campos
+        document.getElementById("register-email").value = "";
+        document.getElementById("register-password").value = "";
+        document.getElementById("confirm-password").value = "";
+        document.getElementById("security-code").value = "";
+
+        // Volver al formulario de login
+        cancelRegister();
+
+    } catch (error) {
+        // Manejar errores específicos de Firebase
+        let errorMessage = "Error al registrar usuario.";
+        
+        switch(error.code) {
+            case 'auth/email-already-in-use':
+                errorMessage = "El correo electrónico ya está registrado.";
+                break;
+            case 'auth/invalid-email':
+                errorMessage = "Correo electrónico inválido.";
+                break;
+            case 'auth/weak-password':
+                errorMessage = "La contraseña es demasiado débil.";
+                break;
+            default:
+                errorMessage = error.message;
+        }
+
+        errorDiv.textContent = errorMessage;
+        errorDiv.style.display = "block";
+        console.error("Error de registro:", error);
+    }
+}
+
+
+        // Función de inicio de sesión
+        async function login() {
+            const email = document.getElementById("login-email").value;
+            const password = document.getElementById("login-password").value;
+            const errorDiv = document.getElementById("login-error");
+
+            // Limpiar mensaje de error previo
+            errorDiv.textContent = "";
+            errorDiv.style.display = "none";
+
+            try {
+                // Iniciar sesión
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                
+                // Ocultar login y mostrar dashboard
+                document.getElementById("login-container").classList.add("hidden");
+                document.getElementById("dashboard-container").classList.remove("hidden");
+
+            } catch (error) {
+                // Manejar errores de inicio de sesión
+                let errorMessage = "Error al iniciar sesión.";
+                
+                switch(error.code) {
+                    case 'auth/wrong-password':
+                        errorMessage = "Contraseña incorrecta.";
+                        break;
+                    case 'auth/user-not-found':
+                        errorMessage = "Usuario no encontrado.";
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage = "Correo electrónico inválido.";
+                        break;
+                    default:
+                        errorMessage = error.message;
+                }
+
+                errorDiv.textContent = errorMessage;
+                errorDiv.style.display = "block";
+                console.error("Error de inicio de sesión:", error);
+            }
+        }
+
+
+// Funciones del Dashboard
+function verMensajes() {
+    window.location.href = "3index.html"; // Redirige al 3index.html
+}
+
+function verFotos() {
+    window.location.href = "Sindex.html"; // Redirige al Sindex.html
+}
+
+function verInvitados() {
+    window.location.href = "6index.html"; // Redirige al 6index.html
+}
+
+// Función para reproducir música
+function playMusic() {
+    var audio = document.getElementById("");
+     if (audio.paused) {
+        audio.play();  // Inicia la música si está pausada
+    }
+}
+
+// Función de Cerrar Sesión
+async function cerrarSesion() {
+    try {
+        await signOut(auth);
+        // Detener la música cuando se cierra sesión
+        stopMusic();
+        // Ocultar dashboard y mostrar login
+        document.getElementById("dashboard-container").classList.add("hidden");
+        document.getElementById("login-container").classList.remove("hidden");
+    } catch (error) {
+        console.error("Error al cerrar sesión:", error);
+    }
+}
+
+// Función para detener la música
+function stopMusic() {
+    var audio = document.getElementById("audioPlayer");
+    audio.pause();  // Detiene la música
+    audio.currentTime = 0;  // Resetea la música al inicio
+}
+
+// Registrar las funciones globalmente
+window.showRegisterForm = showRegisterForm;
+window.cancelRegister = cancelRegister;
+window.register = register;
+window.login = login;
+window.verMensajes = verMensajes;
+window.verFotos = verFotos;
+window.verInvitados = verInvitados;
+window.cerrarSesion = cerrarSesion;
+</script>

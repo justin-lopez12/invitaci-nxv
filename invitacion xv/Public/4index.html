@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <title>Confirmación de Asistencia - Quinceañera</title>
+    <style>
+        /* Estilos originales completos */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap');
+
+        body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: url('imagenes/verde.avif') no-repeat center center fixed;
+    background-size: cover;
+    color: #333;
+    overflow-y: auto; /* Usa 'auto' en lugar de 'scroll' */
+    min-height: 100vh; /* Asegura que el cuerpo ocupe toda la altura de la ventana */
+}
+
+
+        .container {
+            max-width: 600px;
+            width: 90%;
+            margin: 20px auto;
+            background: url('imagenes/dorado.jpg') no-repeat center center;
+            background-size: cover;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.5);
+            color: #FFD700;
+            padding: 20px;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .content {
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .content h4 {
+            font-size: 22px;
+            color: #4B2E83;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        label, input {
+            display: block;
+            width: 100%;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        input {
+            padding: 10px;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            border-color: #FFD700;
+            box-shadow: 0 0 8px #FFD700;
+        }
+
+        .options, .final-buttons {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        button {
+            background: linear-gradient(45deg, #FFD700, #FFB800);
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        .success-message {
+            display: none;
+            text-align: center;
+            background: linear-gradient(45deg, #004b03, #66bb6a);
+            color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: bold;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        .success-registro {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 15px;
+            display: none;
+        }
+
+    /* Nuevos estilos para sección de cuestionario tipo Kahoot */
+.kahoot-quiz {
+    background: url('imagenes/fondo90.jpg') no-repeat center center fixed;
+    background-size: cover;
+    color: rgb(0, 121, 0);
+    border-radius: 20px;
+    padding: 30px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease-in-out;
+    font-family: 'Playfair Display', serif; /* Fuente elegante */
+}
+
+.kahoot-quiz:hover {
+    transform: scale(1.02); /* Efecto de ampliación suave al pasar el cursor */
+}
+
+.kahoot-quiz h2 {
+    color: #fbe411;
+    font-size: 80px; /* Fuente más grande */
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.6); /* Más definido para simular borde */
+    font-family: 'Playfair Display', serif; /* Fuente elegante */
+    -webkit-text-stroke: 0.5px black; /* Trazo más delgado */
+    text-stroke: 0.5px black; /* Trazo más delgado */
+    padding: 10px;
+    border-radius: 10px;
+}
+
+/* Aplicar trazo a todas las fuentes */
+.kahoot-quiz p, .kahoot-quiz span, .kahoot-quiz h2, .kahoot-quiz .options button, .kahoot-quiz .response-message {
+    -webkit-text-stroke: 0.5px black; /* Trazo más delgado */
+    text-stroke: 0.5px black; /* Trazo más delgado */
+    color: white; /* Color del texto */
+}
+
+/* Estilo de las opciones de respuesta */
+.kahoot-quiz .options button {
+    background: url('imagenes/verde S.avif') no-repeat center center fixed;
+    background-size: cover;
+    margin: 10px;
+    padding: 18px 25px;
+    width: calc(50% - 20px);
+    border: none;
+    border-radius: 12px;
+    font-size: 24px; /* Aumentar el tamaño de la fuente en los botones */
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.3s;
+    font-family: 'Playfair Display', serif; /* Fuente elegante */
+    position: relative;
+    top: -10px; /* Mover un poco hacia arriba */
+    -webkit-text-stroke: 0.5px black; /* Trazo más delgado */
+    text-stroke: 0.5px black; /* Trazo más delgado */
+}
+
+.kahoot-quiz .options button:hover {
+    transform: scale(1.05); /* Efecto al pasar el cursor */
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3); /* Sombra en el botón */
+    transition: transform 0.2s, box-shadow 0.3s; /* Transición suave */
+}
+
+/* Estilo de botón cuando la respuesta es correcta */
+.kahoot-quiz .options button.correct {
+    background-color: #27ae60; /* Verde */
+    box-shadow: 0 6px 15px rgba(0, 255, 0, 0.5); /* Sombra verde */
+}
+
+/* Estilo de botón cuando la respuesta es incorrecta */
+.kahoot-quiz .options button.incorrect {
+    background-color: #e74c3c; /* Rojo */
+    box-shadow: 0 6px 15px rgba(255, 0, 0, 0.5); /* Sombra roja */
+}
+
+/* Estilo para mostrar el mensaje de respuesta (correcta/incorrecta) */
+.kahoot-quiz .response-message {
+    font-size: 24px; /* Aumentar tamaño de la fuente */
+    font-weight: bold;
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 8px;
+    color: white;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4);
+    position: relative;
+    top: 20px; /* Moverlo un poco hacia abajo */
+    width: calc(100% - 40px);
+    margin-left: 20px;
+    margin-right: 20px;
+    -webkit-text-stroke: 0.3px black; /* Trazo más delgado */
+    text-stroke: 0.3px black; /* Trazo más delgado */
+}
+
+/* Estilo cuando la respuesta es correcta */
+.kahoot-quiz .response-message.correct {
+    background-color: #27ae60; /* Verde */
+}
+
+/* Estilo cuando la respuesta es incorrecta */
+.kahoot-quiz .response-message.incorrect {
+    background-color: #e74c3c; /* Rojo */
+}
+
+/* Estilos específicos para dispositivos móviles */
+@media (max-width: 768px) {
+    /* Ajustar tamaño de fuente para pantallas pequeñas */
+    .kahoot-quiz h2 {
+        font-size: 40px; /* Fuente más pequeña en móviles */
+    }
+
+    .kahoot-quiz .options button {
+        padding: 15px 20px; /* Reducir padding en botones */
+        width: 100%; /* Botones ocupan el 100% de ancho */
+        font-size: 24px; /* Aumentar tamaño de texto en botones */
+    }
+
+    .kahoot-quiz .response-message {
+        font-size: 20px; /* Reducir tamaño de la fuente para la respuesta */
+        padding: 10px; /* Reducir padding */
+    }
+}
+
+.final-section {
+    display: none;
+    background: linear-gradient(135deg, #2ecc71, #27ae60); /* Gradiente de verde más claro */
+    color: white;
+    padding: 35px;
+    text-align: center;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    animation: fadeIn 1s ease-in-out;
+}
+
+/* Personalización de la barra de desplazamiento */
+.final-section::-webkit-scrollbar {
+    width: 12px; /* Ancho de la barra de desplazamiento */
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(45deg, #FFD700, #66bb6a); /* Dorado y verde */
+    border-radius: 10px;
+    border: 3px solid #4CAF50; /* Borde verde */
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1; /* Fondo claro */
+    border-radius: 10px;
+}
+
+    </style>
+</head>
+<body>
+    <!-- Espacio para música -->
+    <audio id="backgroundMusic" loop>
+        <source src="musica/classic.ogg" type="audio/mpeg">
+        Tu navegador no soporta audio.
+    </audio>
+    <!-- Sonido al presionar botones -->
+<audio id="clickSound" src="musica/boton.ogg"></audio>
+
+<script>
+    // Función para reproducir el sonido con retraso
+    function playClickSound() {
+        setTimeout(function() {
+            document.getElementById("clickSound").play(); // Reproduce el sonido
+        }, 3000); // Retraso de 3 segundos (3000 milisegundos)
+    }
+
+    // Llama a la función cuando un botón es presionado
+    document.querySelectorAll('.kahoot-quiz .options button').forEach(function(button) {
+        button.addEventListener('click', playClickSound);
+    });
+</script>
+
+
+    <div class="container">
+        <div class="header">
+            <h1>Registro de Invitados</h1>
+        </div>
+        <div class="content">
+            <label for="nombreInvitado">Nombre del Invitado o Familia:</label>
+            <input type="text" id="nombreInvitado" placeholder="Escribe tu nombre completo">
+            <label for="correoInvitado">Correo Electrónico:</label>
+            <input type="email" id="correoInvitado" placeholder="Escribe tu correo electrónico">
+            <div class="final-buttons">
+                <button id="registerButton">Registrar</button>
+            </div>
+            <div id="successRegistro" class="success-registro"></div>
+        </div>
+    </div>
+
+    <!-- Sección de código de invitación -->
+    <div id="quizSection" style="display:none; text-align:center; background-color:#fff; padding:20px;">
+        <h2>Tu Código de Invitación</h2>
+        <h3 id="userCode"></h3>
+        <button id="startQuizBtn">Iniciar Cuestionario</button>
+    </div>
+
+    <!-- Sección del cuestionario con estilo Kahoot -->
+    <div id="quizQuestions" class="kahoot-quiz" style="display:none;">
+        <h2>Preguntas</h2>
+        <p id="question"></p>
+        <div id="answerOptions" class="options">
+            <!-- Las opciones del cuestionario serán dinámicamente cargadas aquí -->
+        </div>
+    </div>
+
+    <!-- Sección final con agradecimiento y botones -->
+<div id="finalSection" class="final-section">
+    <h2>¡Gracias por participar!</h2>
+    <p>Por favor, toma una captura de pantalla de tu código de invitación para el evento.</p>
+    <div class="final-section-buttons">
+        <!-- Botones con funcionalidad para redirigir a diferentes páginas -->
+        <button id="button1">Regresar a la invitación</button>
+        <button id="button2">Ir a la lluvia de fotos</button>
+        <button id="button3">Ir al buzón de mensajes</button>
+    </div>
+</div>
+
+<script>
+    // Funcionalidad de los botones
+    document.getElementById("button1").addEventListener("click", function () {
+        window.location.href = "2index.html"; // Redirige al archivo 2index.html
+    });
+
+    document.getElementById("button2").addEventListener("click", function () {
+        window.location.href = "Sindex.html"; // Redirige al archivo Sindex.html
+    });
+
+    document.getElementById("button3").addEventListener("click", function () {
+        window.location.href = "3index.html"; // Redirige al archivo 3index.html
+    });
+</script>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+        import { getFirestore, collection, query, where, getDocs, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
+    
+        const firebaseConfig = {
+            apiKey: "AIzaSyDZRcqreoUfFisjvIkf5pBbPRvnesgUR9g",
+            authDomain: "invitacionxv2.firebaseapp.com",
+            projectId: "invitacionxv2",
+            storageBucket: "invitacionxv2.appspot.com",
+            messagingSenderId: "548396297209",
+            appId: "1:548396297209:web:f2a67369f7f07f3f78eb22", 
+            measurementId: "G-HTHW4TXJKZ"
+        };
+    
+        let db = null;
+        let auth = null;
+    
+        function initFirebase() {
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+            setupEventListeners();
+        }
+    
+        function setupEventListeners() {
+    const registerButton = document.getElementById('registerButton');
+    registerButton.addEventListener('click', () => {
+        playClickSound();  // Reproducir sonido
+        registerGuest();    // Función de registro
+    });
+
+    const startQuizButton = document.getElementById('startQuizBtn');
+    startQuizButton.addEventListener('click', () => {
+        playClickSound();  // Reproducir sonido
+        startQuiz();       // Función de iniciar cuestionario
+    });
+
+    const finalButtons = document.querySelectorAll('.final-section-buttons button');
+    finalButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            playClickSound();  // Reproducir sonido
+        });
+    });
+
+    // Reproducir música al cargar la página
+    const backgroundMusic = document.getElementById('backgroundMusic');
+    window.addEventListener('load', () => {
+        backgroundMusic.play().catch(error => {
+            console.log("Reproducción de música bloqueada");
+        });
+    });
+}
+
+function playClickSound() {
+    const clickSound = document.getElementById('clickSound');
+    clickSound.play().catch(error => {
+        console.log("El sonido no se pudo reproducir:", error);
+    });
+}
+
+    
+        function validateEmail(email) {
+            const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            return re.test(String(email).toLowerCase());
+        }
+    
+        function generateUniqueCode() {
+            return "USR" + Math.floor(10000 + Math.random() * 90000);
+        }
+    
+        async function checkIfEmailExists(email) {
+            try {
+                const q = query(collection(db, "invitados"), where("email", "==", email));
+                const querySnapshot = await getDocs(q);
+                return !querySnapshot.empty;
+            } catch (error) {
+                console.error("Error al verificar el correo:", error);
+                alert("Error de conexión. Intenta de nuevo más tarde.");
+                return false;
+            }
+        }
+    
+        async function registerGuest() {
+            const nombreInvitado = document.getElementById('nombreInvitado').value.trim();
+            const correoInvitado = document.getElementById('correoInvitado').value.trim();
+            const successRegistro = document.getElementById('successRegistro');
+    
+            if (nombreInvitado === "") {
+                alert("Por favor, ingresa el nombre del invitado o familia.");
+                return;
+            }
+    
+            if (!validateEmail(correoInvitado)) {
+                alert("Por favor, ingresa un correo electrónico válido.");
+                return;
+            }
+    
+            try {
+                const emailExists = await checkIfEmailExists(correoInvitado);
+                if (emailExists) {
+                    alert("Este correo ya ha sido registrado. No puedes registrarte dos veces.");
+                    return;
+                }
+    
+                const uniqueCode = generateUniqueCode();
+                const fechaRegistro = new Date().getFullYear(); // Año actual como número
+    
+                await addDoc(collection(db, "invitados"), {
+                    nombre: nombreInvitado,
+                    email: correoInvitado,
+                    codigo: uniqueCode,
+                    fechaRegistro: fechaRegistro,
+                    estado: "Pendiente" // Estado por defecto
+                });
+    
+                successRegistro.style.display = 'block';
+successRegistro.innerHTML = `¡Registro exitoso, ${nombreInvitado}! Tu código de invitación es: <strong>${uniqueCode}</strong>. Toma una captura de pantalla.`;
+
+document.getElementById('nombreInvitado').value = '';
+document.getElementById('correoInvitado').value = '';
+
+setTimeout(() => {
+    document.getElementById('quizSection').style.display = 'block';
+    document.getElementById('userCode').innerText = `Tu código es: ${uniqueCode}`;
+}, 2000);
+            } catch (error) {
+                console.error("Error en el registro:", error);
+                alert("Ocurrió un error al registrar tu información. Intenta de nuevo más tarde.");
+            }
+        }
+
+        // Función para mostrar las preguntas del cuestionario
+        async function startQuiz() {
+            document.getElementById('quizSection').style.display = 'none';
+            document.getElementById('quizQuestions').style.display = 'block';
+
+           // Aquí puedes cargar dinámicamente las preguntas y respuestas desde la base de datos o cualquier otra fuente
+const questions = [
+    { question: "¿Nombre de la quinceañera?", options: ["Zulma Dayana López Ortega", "Karen Daniela Ortega lopez", "Andrea Dayana López ortega", "Zulema Dayana López Ortega"], correctAnswer: "Zulma Dayana López Ortega" },
+    { question: "¿Fecha de nacimiento de la quinceañera?", options: ["19 de febrero de 2010", "19 de diciembre de 2009", "15 de febrero de 2010", "20 de enero de 2010"], correctAnswer: "19 de febrero de 2010" },
+    { question: "¿Comida favorita de la quinceañera?", options: ["Pizza", "Tacos", "Hamburguesas", "Pasta"], correctAnswer: "Tacos" },
+    { question: "¿Artista favorita de la quinceañera?", options: ["Espinoza Paz", "Christian Nodal", "Karol G", "Shakira"], correctAnswer: "Espinoza Paz" },
+    { question: "¿Nombres de los hermanos de la quinceañera?", options: ["Justin y Angely López", "Alexander y María López", "Carlos y Angie Ortega", "Daniel y Ana ortega"], correctAnswer: "Justin y Angely López" },
+    { question: "¿Nombres de los padres de la quinceañera?", options: ["Alex López y Sulma Ortega", "Mario López y Carmen Ortega", "Luis Ortega y Ana López", "Carlos Ortega y Alejandra López"], correctAnswer: "Alex López y Sulma Ortega" },
+    { question: "¿Color favorito de la quinceañera?", options: ["Blanco", "Rosa", "Celeste", "Morado"], correctAnswer: "Blanco" },
+    { question: "¿En qué grado está la quinceañera?", options: ["Tercero de básico", "Segundo de basico", "bachillerato", "Primero básico"], correctAnswer: "Tercero de básica" },
+    { question: "¿Cuál fue su primera palabra?", options: ["Mamá", "Papá", "Agua", "Abuelo"], correctAnswer: "Mamá" },
+    { question: "¿Fiesta del año favorita de la quinceañera?", options: ["Navidad", "Año Nuevo", "Día del Niño", "Semana Santa"], correctAnswer: "Navidad" },
+    { question: "¿A qué hora nació la quinceañera?", options: ["9:01 a.m.", "8:45 p.m.", "12:30 p.m.", "7:15 a.m."], correctAnswer: "9:01 a.m." },
+    { question: "¿Programas favoritos de la quinceañera?", options: ["La Academia y Miss Universo", "La Voz y El Chavo del 8", "MasterChef y Rebelde", "Cantando por un Sueño y Friends"], correctAnswer: "La Academia y Miss Universo" },
+    { question: "¿Bebida favorita de la quinceañera?", options: ["Coca-Cola", "Pepsi", "Jugo de Naranja", "Agua Mineral"], correctAnswer: "Coca-Cola" },
+    { question: "¿Pasatiempo favorito de la quinceañera?", options: ["Arreglarse las uñas y el pelo", "Leer libros", "Escuchar música", "Practicar deportes"], correctAnswer: "Arreglarse las uñas y el pelo" },
+    { question: "¿En qué departamento nació la quinceañera?", options: ["Guatemala capital", "Guastatoya el Progreso", "Escuintla", "Sacatepéquez"], correctAnswer: "Guatemala capital" }
+];
+
+
+            let currentQuestionIndex = 0;
+            let correctAnswersCount = 0;
+
+            function loadQuestion() {
+                const questionData = questions[currentQuestionIndex];
+                document.getElementById('question').innerText = questionData.question;
+
+                const optionsContainer = document.getElementById('answerOptions');
+                optionsContainer.innerHTML = ""; // Limpiar opciones previas
+
+                questionData.options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.innerText = option;
+                    button.onclick = () => checkAnswer(option, questionData.correctAnswer);
+                    optionsContainer.appendChild(button);
+                });
+            }
+
+            function checkAnswer(selectedAnswer, correctAnswer) {
+                if (selectedAnswer === correctAnswer) {
+                    correctAnswersCount++;
+                    alert("¡Respuesta correcta!");
+                } else {
+                    alert("Respuesta incorrecta. La respuesta correcta es " + correctAnswer);
+                }
+
+                currentQuestionIndex++;
+
+                if (currentQuestionIndex < questions.length) {
+                    loadQuestion(); // Cargar siguiente pregunta
+                } else {
+                    document.getElementById('quizQuestions').style.display = 'none';
+                    document.getElementById('finalSection').style.display = 'block';
+                }
+            }
+
+            loadQuestion(); // Cargar la primera pregunta
+        }
+
+        // Asignar el evento al botón para iniciar el cuestionario
+        const startQuizBtn = document.getElementById('startQuizBtn');
+        startQuizBtn.addEventListener('click', startQuiz);
+    
+        initFirebase();
+    </script>
+</body>
+</html>
